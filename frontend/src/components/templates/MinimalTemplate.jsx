@@ -2,7 +2,7 @@ import React from 'react';
 import { Mail, ExternalLink, ArrowRight } from 'lucide-react';
 import { Github, Linkedin } from '../common/SocialIcons';
 
-export const MinimalTemplate = ({ resumeData, theme = 'dark', sectionVisibility = {}, sectionOrder = [] }) => {
+export const MinimalTemplate = ({ resumeData, theme = 'light', sectionVisibility = {}, sectionOrder = [] }) => {
   const isDark = theme === 'dark';
   const bg = isDark ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900';
   const cardBg = isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200';

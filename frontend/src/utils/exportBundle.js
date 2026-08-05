@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
-export const generateStaticHTML = (resumeData, template = 'developer', theme = 'dark', sectionOrder = [], sectionVisibility = {}) => {
+export const generateStaticHTML = (resumeData, template = 'developer', theme = 'light', sectionOrder = [], sectionVisibility = {}) => {
   const isDark = theme === 'dark';
   const bgColor = isDark ? '#0b0f19' : '#ffffff';
   const cardBg = isDark ? '#161e2e' : '#f8fafc';

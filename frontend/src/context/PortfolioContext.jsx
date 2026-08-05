@@ -105,7 +105,7 @@ export const PortfolioProvider = ({ children }) => {
   const [currentStep, setCurrentStep] = useState('landing'); // 'landing', 'upload', 'editor', 'builder', 'export'
   const [resumeData, setResumeData] = useState(initialResumeData);
   const [activeTemplate, setActiveTemplate] = useState('developer'); // 'minimal', 'developer', 'creative'
-  const [portfolioTheme, setPortfolioTheme] = useState('dark'); // 'dark', 'light'
+  const [portfolioTheme, setPortfolioTheme] = useState('light'); // 'light', 'dark'
   const [previewMode, setPreviewMode] = useState('desktop'); // 'desktop', 'mobile'
   const [sectionOrder, setSectionOrder] = useState(defaultSectionOrder);
   const [sectionVisibility, setSectionVisibility] = useState({
