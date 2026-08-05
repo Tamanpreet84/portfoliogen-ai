@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sparkles, ArrowUpRight, Code, Briefcase, GraduationCap, Mail } from 'lucide-react';
 
-export const CreativeTemplate = ({ resumeData, theme = 'light', sectionVisibility = {}, sectionOrder = [] }) => {
+export const CreativeTemplate = ({ resumeData, theme = 'dark', sectionVisibility = {}, sectionOrder = [] }) => {
   const isDark = theme === 'dark';
   const bg = isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900';
   const cardBg = isDark ? 'bg-slate-900/60 border-slate-800/80 backdrop-blur-md' : 'bg-white/80 border-slate-200 backdrop-blur-md';

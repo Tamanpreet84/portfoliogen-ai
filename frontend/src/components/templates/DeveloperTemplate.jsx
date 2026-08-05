@@ -2,7 +2,7 @@ import React from 'react';
 import { Terminal, Code2, Cpu, GitBranch, ExternalLink, Mail } from 'lucide-react';
 import { Github, Linkedin } from '../common/SocialIcons';
 
-export const DeveloperTemplate = ({ resumeData, theme = 'light', sectionVisibility = {}, sectionOrder = [] }) => {
+export const DeveloperTemplate = ({ resumeData, theme = 'dark', sectionVisibility = {}, sectionOrder = [] }) => {
   const isDark = theme === 'dark';
   const bg = isDark ? 'bg-[#090d16] text-slate-100' : 'bg-slate-100 text-slate-900';
   const cardBg = isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200';
