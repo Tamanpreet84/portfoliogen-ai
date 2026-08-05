@@ -1,7 +1,6 @@
 import React from 'react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { Sparkles, Upload, Edit3, Layout, Download, Sun, Moon } from 'lucide-react';
-import { Github } from '../common/SocialIcons';
 
 export const Navbar = () => {
   const { currentStep, setCurrentStep, toastMessage, appTheme, toggleAppTheme } = usePortfolio();
@@ -86,20 +85,6 @@ export const Navbar = () => {
               </>
             )}
           </button>
-
-          <a
-            href="https://github.com/Tamanpreet84/portfoliogen-ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg border transition ${
-              appTheme === 'dark'
-                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700'
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-            }`}
-          >
-            <Github className="w-4 h-4" />
-            <span className="hidden lg:inline">GitHub</span>
-          </a>
           
           {currentStep === 'landing' ? (
             <button
