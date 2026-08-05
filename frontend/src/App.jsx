@@ -25,15 +25,24 @@ const MainContent = () => {
   }
 };
 
+const AppLayout = () => {
+  const { appTheme } = usePortfolio();
+  return (
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
+      appTheme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+    }`}>
+      <Navbar />
+      <main className="flex-1">
+        <MainContent />
+      </main>
+    </div>
+  );
+};
+
 export default function App() {
   return (
     <PortfolioProvider>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-        <Navbar />
-        <main className="flex-1">
-          <MainContent />
-        </main>
-      </div>
+      <AppLayout />
     </PortfolioProvider>
   );
 }

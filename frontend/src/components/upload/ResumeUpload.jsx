@@ -3,7 +3,8 @@ import { usePortfolio, initialResumeData } from '../../context/PortfolioContext'
 import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, Sparkles, ArrowRight } from 'lucide-react';
 
 export const ResumeUpload = () => {
-  const { setResumeData, setCurrentStep, showToast } = usePortfolio();
+  const { setResumeData, setCurrentStep, showToast, appTheme } = usePortfolio();
+  const isDark = appTheme === 'dark';
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
@@ -101,16 +102,18 @@ export const ResumeUpload = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-16 px-4">
+    <div className={`min-h-screen py-16 px-4 transition-colors ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <div className="max-w-3xl mx-auto">
         
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-xs font-semibold mb-3 border border-sky-500/20">
+          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3 border ${
+            isDark ? 'bg-sky-500/10 text-sky-400 border-sky-500/20' : 'bg-sky-50 text-sky-600 border-sky-200'
+          }`}>
             <Upload className="w-3.5 h-3.5" />
             <span>Step 1: Document Upload</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3">Upload Your Resume</h1>
+          <h1 className={`text-3xl md:text-4xl font-extrabold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>Upload Your Resume</h1>
           <p className="text-slate-400 text-sm max-w-lg mx-auto">
             Upload your existing PDF or Word resume. Our AI parser will extract your contact info, skills, projects, and work history automatically.
           </p>

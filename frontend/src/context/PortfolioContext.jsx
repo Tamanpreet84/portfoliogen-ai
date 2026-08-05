@@ -106,7 +106,12 @@ export const PortfolioProvider = ({ children }) => {
   const [resumeData, setResumeData] = useState(initialResumeData);
   const [activeTemplate, setActiveTemplate] = useState('developer'); // 'minimal', 'developer', 'creative'
   const [portfolioTheme, setPortfolioTheme] = useState('light'); // 'light', 'dark'
+  const [appTheme, setAppTheme] = useState('dark'); // 'dark', 'light'
   const [previewMode, setPreviewMode] = useState('desktop'); // 'desktop', 'mobile'
+
+  const toggleAppTheme = () => {
+    setAppTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
   const [sectionOrder, setSectionOrder] = useState(defaultSectionOrder);
   const [sectionVisibility, setSectionVisibility] = useState({
     hero: true,
@@ -162,6 +167,9 @@ export const PortfolioProvider = ({ children }) => {
       setActiveTemplate,
       portfolioTheme,
       setPortfolioTheme,
+      appTheme,
+      setAppTheme,
+      toggleAppTheme,
       previewMode,
       setPreviewMode,
       sectionOrder,

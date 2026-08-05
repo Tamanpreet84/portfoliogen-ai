@@ -4,7 +4,8 @@ import { exportPortfolioZip, generateStaticHTML } from '../../utils/exportBundle
 import { Download, Copy, Check, ExternalLink, Globe, Rocket, ShieldCheck, ArrowLeft, Code } from 'lucide-react';
 
 export const ExportCenter = () => {
-  const { resumeData, activeTemplate, portfolioTheme, sectionOrder, sectionVisibility, setCurrentStep, showToast } = usePortfolio();
+  const { resumeData, activeTemplate, portfolioTheme, sectionOrder, sectionVisibility, setCurrentStep, showToast, appTheme } = usePortfolio();
+  const isDark = appTheme === 'dark';
   const [copied, setCopied] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -30,7 +31,7 @@ export const ExportCenter = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-16 px-4">
+    <div className={`min-h-screen py-16 px-4 transition-colors ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <div className="max-w-4xl mx-auto space-y-10">
         
         {/* Header */}

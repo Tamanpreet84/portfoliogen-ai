@@ -3,7 +3,8 @@ import { usePortfolio } from '../../context/PortfolioContext';
 import { Edit3, Sparkles, User, Code, Briefcase, FolderGit2, GraduationCap, Award, Mail, Plus, Trash2, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 
 export const InformationEditor = () => {
-  const { resumeData, setResumeData, updateResumeData, setCurrentStep, isEnhancing, setIsEnhancing, showToast } = usePortfolio();
+  const { resumeData, setResumeData, updateResumeData, setCurrentStep, isEnhancing, setIsEnhancing, showToast, appTheme } = usePortfolio();
+  const isDark = appTheme === 'dark';
   const [activeTab, setActiveTab] = useState('personal');
 
   const tabs = [
@@ -116,17 +117,19 @@ export const InformationEditor = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-12 px-4">
+    <div className={`min-h-screen py-12 px-4 transition-colors ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <div className="max-w-5xl mx-auto">
         
         {/* Step Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-xs font-semibold mb-2 border border-sky-500/20">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-2 border ${
+              isDark ? 'bg-sky-500/10 text-sky-400 border-sky-500/20' : 'bg-sky-50 text-sky-600 border-sky-200'
+            }`}>
               <Edit3 className="w-3.5 h-3.5" />
               <span>Step 2: Review & Edit Extracted Data</span>
             </div>
-            <h1 className="text-3xl font-extrabold text-white">Extracted Information Editor</h1>
+            <h1 className={`text-3xl font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>Extracted Information Editor</h1>
             <p className="text-xs text-slate-400 mt-1">Review, correct, or refine your information before generating the portfolio.</p>
           </div>
 

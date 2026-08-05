@@ -3,7 +3,8 @@ import { usePortfolio } from '../../context/PortfolioContext';
 import { Sparkles, Upload, FileText, CheckCircle2, ArrowRight, ShieldCheck, Download, Code, Palette, Zap } from 'lucide-react';
 
 export const LandingPage = () => {
-  const { setCurrentStep, setActiveTemplate } = usePortfolio();
+  const { setCurrentStep, setActiveTemplate, appTheme } = usePortfolio();
+  const isDark = appTheme === 'dark';
 
   const features = [
     {
@@ -39,7 +40,7 @@ export const LandingPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className={`min-h-screen transition-colors ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       
       {/* Hero Section */}
       <section className="relative pt-20 pb-24 px-4 overflow-hidden">
@@ -48,14 +49,16 @@ export const LandingPage = () => {
 
         <div className="max-w-5xl mx-auto text-center relative z-10">
           
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/80 border border-sky-500/30 text-sky-400 text-xs font-semibold mb-6 shadow-lg">
+          <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-6 shadow-lg border ${
+            isDark ? 'bg-slate-800/80 border-sky-500/30 text-sky-400' : 'bg-sky-50 border-sky-200 text-sky-600'
+          }`}>
             <Sparkles className="w-4 h-4" />
             <span>AI-Powered Resume to Portfolio Generator</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white mb-6 leading-tight">
+          <h1 className={`text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
             Turn Your Resume Into A <br />
-            <span className="bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 bg-clip-text text-transparent">
               Stunning Developer Portfolio
             </span>
           </h1>
