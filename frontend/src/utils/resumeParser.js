@@ -3,6 +3,30 @@ import * as pdfjsLib from 'pdfjs-dist';
 // Configure pdfjs worker to parse PDF binary streams in browser cleanly
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
+export const extractPdfPageLines = (textContent) => {
+  const lineMap = new Map();
+  for (const item of textContent.items) {
+    if (!item.str || !item.str.trim()) continue;
+    // Round Y-coordinate to group items on the same visual line
+    const y = item.transform ? Math.round(item.transform[5] / 4) * 4 : 0;
+    if (!lineMap.has(y)) {
+      lineMap.set(y, []);
+    }
+    lineMap.get(y).push(item);
+  }
+
+  // Sort lines from top of page to bottom (descending Y)
+  const sortedY = Array.from(lineMap.keys()).sort((a, b) => b - a);
+
+  return sortedY
+    .map(y => {
+      // Sort items on the same line from left to right (ascending X)
+      const items = lineMap.get(y).sort((a, b) => (a.transform ? a.transform[4] : 0) - (b.transform ? b.transform[4] : 0));
+      return items.map(it => it.str).join(' ').replace(/\s+/g, ' ').trim();
+    })
+    .filter(line => line.length > 0);
+};
+
 export const extractFileTextInstant = async (file) => {
   try {
     const ext = file.name.split('.').pop().toLowerCase();
@@ -11,15 +35,16 @@ export const extractFileTextInstant = async (file) => {
     if (ext === 'pdf') {
       const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
       const pdf = await loadingTask.promise;
-      let fullText = '';
+      let pageLines = [];
       
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         const page = await pdf.getPage(pageNum);
         const textContent = await page.getTextContent();
-        const pageItems = textContent.items.map(item => item.str);
-        fullText += pageItems.join(' ') + '\n';
+        const lines = extractPdfPageLines(textContent);
+        pageLines.push(...lines);
       }
 
+      const fullText = pageLines.join('\n');
       if (fullText.trim().length > 10) {
         return fullText;
       }
@@ -71,35 +96,45 @@ export const parseResumeTextClient = (rawText, filename = 'resume.pdf') => {
   const linkedin = linkedinMatch ? linkedinMatch[0] : "";
   const website = websiteMatch ? websiteMatch[0] : "";
 
-  // Derive Name from clean lines or filename
-  let fallbackName = filename
-    .replace(/\.(pdf|docx)$/i, '')
-    .replace(/(resume|cv|curriculum|vitoe|final|updated|draft|_|-)/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  fallbackName = fallbackName.replace(/\b\w/g, l => l.toUpperCase()) || "Developer";
-
+  // 1. Detect Real Name from CV Top Lines
   let detectedName = "";
-  for (const line of cleanLines.slice(0, 8)) {
-    // Check if line looks like a person's name (2-4 words, no digits or contact keywords)
-    if (
-      !/email|phone|github|linkedin|http|@|resume|cv|page|curriculum/i.test(line) &&
-      !/\d/.test(line) &&
-      line.length >= 3 &&
-      line.length <= 40
-    ) {
-      detectedName = line;
-      break;
+  for (const line of cleanLines.slice(0, 10)) {
+    if (/email|phone|github|linkedin|http|@|resume|cv|curriculum|page|contact|address|cgpa|gpa|profile/i.test(line)) {
+      continue;
+    }
+    if (/\d/.test(line)) continue;
+    
+    const wordCount = line.split(/\s+/).length;
+    if (wordCount >= 1 && wordCount <= 4 && line.length >= 2 && line.length <= 35) {
+      detectedName = line.replace(/[^a-zA-Z\s.-]/g, '').trim();
+      if (detectedName) break;
     }
   }
 
-  const name = detectedName || fallbackName;
+  // 2. Name Fallback from Email Address (e.g. tamanpreet.singh@gmail.com -> Tamanpreet Singh)
+  let emailNameFallback = "";
+  if (!detectedName && email) {
+    const handle = email.split('@')[0].replace(/[._-]/g, ' ');
+    if (handle.length > 2) {
+      emailNameFallback = handle.replace(/\b\w/g, l => l.toUpperCase());
+    }
+  }
+
+  // 3. Fallback from Filename (Cleaning out words like 'resume', 'cv', 'cgpa', 'new', 'final')
+  let filenameFallback = filename
+    .replace(/\.(pdf|docx)$/i, '')
+    .replace(/(resume|cv|curriculum|vitoe|final|updated|draft|cgpa|gpa|_|-)/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  filenameFallback = filenameFallback.replace(/\b\w/g, l => l.toUpperCase()) || "Developer";
+
+  const name = detectedName || emailNameFallback || filenameFallback;
 
   // Derive Title
   let title = "Software Engineer";
   for (const line of cleanLines.slice(0, 15)) {
     if (/developer|engineer|designer|manager|intern|architect|analyst|data scientist|student|full stack|frontend|backend/i.test(line)) {
-      if (line.length <= 50 && line !== name) {
+      if (line.length <= 60 && line !== name) {
         title = line;
         break;
       }
@@ -121,36 +156,52 @@ export const parseResumeTextClient = (rawText, filename = 'resume.pdf') => {
   const softKeywords = ["Problem Solving", "Leadership", "Teamwork", "Agile", "Scrum", "Communication"];
   const foundSoft = softKeywords.filter(s => new RegExp(`\\b${s}\\b`, 'i').test(cleanedText));
 
-  const aboutText = cleanedText.length > 50 
-    ? cleanedText.slice(0, 450).trim() + '...'
-    : `Dedicated ${title} passionate about software architecture, clean code, and creating intuitive digital user experiences.`;
+  // Extract Summary / About section from CV text
+  let aboutText = "";
+  for (let i = 0; i < cleanLines.length; i++) {
+    const l = cleanLines[i];
+    if (/summary|about|profile|objective/i.test(l) && l.length < 30) {
+      aboutText = cleanLines.slice(i + 1, i + 5).join(' ');
+      break;
+    }
+  }
+
+  if (!aboutText || aboutText.length < 20) {
+    aboutText = cleanLines.slice(0, 6).filter(l => l !== name && l !== title).join(' ');
+  }
+
+  if (!aboutText || aboutText.length < 20) {
+    aboutText = `Passionate ${title} with expertise in building scalable web applications, clean code architecture, and high-performance software.`;
+  } else if (aboutText.length > 400) {
+    aboutText = aboutText.slice(0, 400) + '...';
+  }
 
   return {
     name: name,
     title: title,
-    headline: `Passionate ${title} building modern digital applications & scalable solutions`,
-    shortIntro: `Hi, I'm ${name}. Experienced in ${foundSkills.slice(0, 4).join(', ') || 'software development'} with a passion for building great products.`,
+    headline: `Passionate ${title} | Architecting Scalable & User-Centric Solutions`,
+    shortIntro: `Hi, I'm ${name}. Experienced in ${foundSkills.slice(0, 4).join(', ') || 'software development'} with a passion for clean code.`,
     about: aboutText,
-    technicalSkills: foundSkills.length > 0 ? foundSkills : ["JavaScript", "React", "Node.js", "Python", "Git"],
+    technicalSkills: foundSkills.length > 0 ? foundSkills : ["Python", "Flask", "Java", "React", "Git"],
     softSkills: foundSoft.length > 0 ? foundSoft : ["Problem Solving", "Team Collaboration"],
     experience: [
       {
-        company: "Software Engineer",
+        company: "Software Developer",
         role: title,
         location: "Remote / On-site",
         startDate: "2023",
         endDate: "Present",
         type: "Job",
         description: [
-          "Developed and deployed high-performance software features and RESTful APIs.",
-          "Collaborated with cross-functional teams to optimize web performance and user experience."
+          "Engineered scalable applications and maintained high code quality standards.",
+          "Collaborated with cross-functional teams to build intuitive user experiences."
         ]
       }
     ],
     projects: [
       {
-        name: "Generative Portfolio Generator",
-        description: "Full-stack web app that extracts resume content and builds personal portfolios.",
+        name: "Personal Portfolio Application",
+        description: "Automated web application that extracts resume details and builds personal portfolios.",
         technologies: foundSkills.slice(0, 4),
         githubUrl: github,
         liveUrl: website
@@ -158,8 +209,8 @@ export const parseResumeTextClient = (rawText, filename = 'resume.pdf') => {
     ],
     education: [
       {
-        degree: "Bachelor of Science in Computer Science / Information Technology",
-        institution: "University Institute",
+        degree: "B.S. in Computer Science / Software Engineering",
+        institution: "University / Institute",
         location: "",
         startDate: "",
         endDate: ""
